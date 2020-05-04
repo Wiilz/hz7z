@@ -17,5 +17,10 @@ class AdminStatus(Enum):
     deleted = 2, '已删除'
 
 
+class BannerPosition(Enum):
+    top = 1, '顶部'
+    mid = 2, '中部'
+
+
 if __name__ == '__main__':
     print(TestEnum(66).zh_value)

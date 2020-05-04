@@ -24,4 +24,5 @@ class IndexEntrance(Base):
     id = Column(String(64), primary_key=True)
     img_url = Column(Text, url=True, comment='图标')
     content_link = Column(Text, comment='链接内容')
+    name = Column(String(64), comment='图标名称')
     item_order = Column(Integer, default=0, comment='图标顺序')
