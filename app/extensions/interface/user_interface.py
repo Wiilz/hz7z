@@ -8,9 +8,9 @@ def is_anonymous():
 
 
 def token_required(func):
-    def inner(self, *args, **kwargs):
+    def inner(*args, **kwargs):
         if not is_anonymous():
-            return func(self, *args, **kwargs)
+            return func(*args, **kwargs)
         raise TokenError()
 
     return inner
@@ -22,9 +22,9 @@ def is_admin():
 
 
 def admin_required(func):
-    def inner(self, *args, **kwargs):
+    def inner(*args, **kwargs):
         if not is_admin():
             raise AuthorityError()
-        return func(self, *args, **kwargs)
+        return func(*args, **kwargs)
 
     return inner

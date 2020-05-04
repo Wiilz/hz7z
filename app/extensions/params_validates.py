@@ -79,6 +79,16 @@ def validate_chinese(name):
     return re_chinese.findall(name)
 
 
+def validate_telephone(telephone):
+    """
+    校验手机号
+    :param telephone:
+    :return: true
+    """
+    if not re.match(r'^1[0-9]{10}$', str(telephone)):
+        raise ParamsError('手机号码格式错误，请检查后重新输入')
+
+
 def validate_datetime(date):
     """判断是否是一个有效的日期字符串"""
     import time
