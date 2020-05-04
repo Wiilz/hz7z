@@ -30,7 +30,8 @@ class RichText(Base):
     def __init__(self):
         super(RichText, self).__init__()
         self.hide('author_id')
-        self.add('material_type_zh')
+        if self.material_type:
+            self.add('material_type_zh')
 
 
 class Media(Base):
@@ -41,7 +42,7 @@ class Media(Base):
     material_type = Column(Integer, comment='类型 material_type id')
     description = Column(Text, comment='简介')
     cover = Column(Text, url=True, comment='主图/视频封面')
-    media_url = Column(Text, comment='媒体资源链接')
+    media_url = Column(Text, url=True, comment='媒体资源链接')
 
     @property
     def material_type_zh(self):
@@ -55,7 +56,8 @@ class Media(Base):
     def __init__(self):
         super(Media, self).__init__()
         self.hide('author_id')
-        self.add('material_type_zh')
+        if self.material_type:
+            self.add('material_type_zh')
 
 
 class MaterialType(Base):

@@ -1,11 +1,12 @@
-from ..web.materials import contacts_list, get_contacts, set_contacts
+from ..web.materials import contacts_list, get_contacts, set_contacts, set_material, get_rich_text
 from ..extensions.base_resource import Resource
 
 
 class Materials(Resource):
     def post(self, string):
         apis = {
-            'set_contacts': set_contacts
+            'set_contacts': set_contacts,
+            'set_material': set_material,
         }
         return apis
 
@@ -13,5 +14,6 @@ class Materials(Resource):
         apis = {
             'contacts_list': contacts_list,
             'contacts': get_contacts,
+            'rich_text': get_rich_text,
         }
         return apis

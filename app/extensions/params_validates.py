@@ -31,7 +31,7 @@ def parameter_required(required=None, others='allow', filter_none=True, forbidde
         elif isinstance(required, dict):
             missed = [required.get(x) if required.get(x) else x for x in required.keys() if x not in data]
             if missed:
-                raise ParamsError('请填写: ' + ', '.join(missed))
+                raise ParamsError('请补全: ' + ', '.join(missed))
         elif isinstance(required, str):
             if required not in data:
                 raise ParamsError('必要参数缺失: ' + required)

@@ -6,7 +6,7 @@ from ..extensions.interface.user_interface import admin_required
 from ..extensions.params_validates import parameter_required
 from ..extensions.success_response import Success
 from ..extensions.error_response import ParamsError
-from ..models import ContactsCard
+from ..models import ContactsCard, MaterialType, RichText, Media
 
 
 def contacts_list():
@@ -79,4 +79,96 @@ def _check_lat_and_long(lat, long):
 @admin_required
 def set_material():
     data = parameter_required(('material_type', 'content'))
-    material_type, title, content = map(lambda x: data.get(x), ('material_type', 'title', 'content'))
+    material_type = data.get('material_type')
+    mt = _check_material_type(material_type)
+    if mt.id < 200:
+        return set_rich_text(mt, data)
+    else:
+        return set_media(mt, data)
+
+
+def set_media(mt, data):
+    """媒体资源/作品展示/校园视频"""
+    base_dict = {'material_type': mt.id, 'content': data.get('media_url')}
+    if mt.name == '校园视频':
+        parameter_required('cover', datafrom=data)
+    else:
+        if data.get('media_url')[-3:] not in ('.jpg', '.jpeg', '.png', '.gif'):
+            raise ParamsError('请检查上传文件格式是否是图片类型')
+    if mt.name != '校园风光':
+        parameter_required({'description': '简介'}, datafrom=data)
+    with db.auto_commit():
+        base_dict['id'] = str(uuid.uuid1())
+        base_dict['author_id'] = getattr(request, 'user').id
+        media_instance = Media.create(base_dict)
+        db.session.add(media_instance)
+    return Success('添加成功', {'media_id': media_instance.id})
+
+
+def set_rich_text(mt, data):
+    """编辑富文本文章"""
+    base_dict = {'material_type': mt.id, 'content': data.get('content')}
+    if mt.name in ('招生简章', '招考信息'):
+        parameter_required({'title': '标题 "title"'}, datafrom=data)
+        base_dict['title'] = data.get('title')
+    elif mt.name == '特色教育':
+        parameter_required({'cover': '顶部图片 "cover"'}, datafrom=data)
+        base_dict['cover'] = data.get('cover')
+    elif mt.name == '学校官微资讯':
+        parameter_required({'title': '标题 "title"', 'cover': '列表页主图 "cover"'}, datafrom=data)
+        base_dict['cover'] = data.get('cover')
+        base_dict['title'] = data.get('title')
+    with db.auto_commit():
+        if not data.get('id'):  # 新增
+            if mt.name not in ('学校官微资讯', '招生简章', '招考信息'
+                               ) and RichText.query.filter(RichText.isdelete == false(),
+                                                           RichText.material_type == mt.id
+                                                           ).first():  # 仅能存在一篇的类型
+                raise ParamsError('该类型重复, 请到已有文章中进行修改')
+            if mt.name == '招生简章' and RichText.query.filter(RichText.isdelete == false(),
+                                                           RichText.material_type == mt.id,
+                                                           RichText.title == data.get('title')):
+                raise ParamsError('该标题文章已存在，请检查是否填写重复')
+            base_dict['id'] = str(uuid.uuid1())
+            base_dict['author_id'] = getattr(request, 'user').id
+            rt_instance = RichText.create(base_dict)
+            msg = '添加成功'
+        else:
+            rt_instance = RichText.query.filter(RichText.isdelete == false(),
+                                                RichText.id == data.get('id')
+                                                ).first_('未找到信息')
+            rt_instance.update(base_dict)
+            msg = '更新成功'
+        db.session.add(rt_instance)
+    return Success(msg, data={'rich_text_id': rt_instance.id})
+
+
+def _check_material_type(material_type):
+    mt = MaterialType.query.filter(MaterialType.isdelete == false(),
+                                   MaterialType.id == material_type
+                                   ).first_('参数错误：material_type，无此分类')
+    return mt
+
+
+def get_rich_text():
+    """获取文章内容"""
+    args = parameter_required('material_type')
+    mt = _check_material_type(args.get('material_type'))
+    rich_text_query = RichText.query.filter(RichText.isdelete == false(), )
+    if mt.id >= 200:
+        raise ParamsError('该material_type 不属于文章分类')
+    if mt.name not in ('学校官微资讯', '招生简章', '招考信息'):  # 仅可存在一篇
+        res = rich_text_query.filter(RichText.material_type == mt.id).first_('未找到信息')
+    else:
+        res = rich_text_query.filter(RichText.material_type == mt.id
+                                     ).order_by(RichText.createtime.desc()).all_with_page()
+        for item in res:
+            item.hide('content')
+            create_time = str(item.createtime).split('-')
+            item.fill('post_time', f"{create_time[0]}年{int(create_time[1])}月{int(create_time[2][:2])}日")
+    return Success('获取成功', data=res)
+
+
+# todo
+def get_medias():
+    pass
