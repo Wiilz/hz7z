@@ -2,6 +2,7 @@
 import os
 from datetime import datetime
 from flask import request, current_app
+from ..config.http_config import MEDIA_HOST
 from ..libs.compress_picture import CompressPicture
 from ..extensions.error_response import NotFound, ParamsError, SystemError, TokenError
 from ..libs.video_thumbnail import video2frames
@@ -99,6 +100,8 @@ def _upload_file(file, folder):
             data += '_' + thumbnail_img.split('_')[-1]
 
         current_app.logger.info(">>>  Upload File Path is  {}  <<<".format(data))
+        # 拼接上媒体服务器域名
+        data, video_thum = map(lambda x: MEDIA_HOST + x if x else '', (data, video_thum))
         return data, video_thum, video_dur, upload_type
     else:
         raise SystemError(u'上传有误, 不支持的文件类型 {}'.format(shuffix))

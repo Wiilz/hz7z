@@ -3,7 +3,7 @@ from flask import Flask
 from flask import Blueprint
 from flask_cors import CORS
 
-from .api import Hello, File, Admin, Config, Materials
+from .api import Hello, File, Admin, Config, Materials, Forms
 from .extensions.request_handler import error_handler, request_first_handler
 from .config.secret import DefaltSettig
 from .extensions.register_ext import register_ext
@@ -18,6 +18,7 @@ def register(app):
     bp.add_url_rule('/admin/<string:string>', view_func=Admin.as_view('admin'))
     bp.add_url_rule('/config/<string:string>', view_func=Config.as_view('config'))
     bp.add_url_rule('/materials/<string:string>', view_func=Materials.as_view('materials'))
+    bp.add_url_rule('/forms/<string:string>', view_func=Forms.as_view('forms'))
     app.register_blueprint(bp)
 
 
