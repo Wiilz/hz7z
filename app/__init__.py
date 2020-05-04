@@ -3,7 +3,7 @@ from flask import Flask
 from flask import Blueprint
 from flask_cors import CORS
 
-from .api import Hello
+from .api import Hello, File
 from .extensions.request_handler import error_handler, request_first_handler
 from .config.secret import DefaltSettig
 from .extensions.register_ext import register_ext
@@ -14,6 +14,7 @@ from .extensions.base_request import Request
 def register(app):
     bp = Blueprint(__name__, 'bp', url_prefix='/api')
     bp.add_url_rule('/hello/<string:string>', view_func=Hello.as_view('hello'))
+    bp.add_url_rule('/file/<string:string>', view_func=File.as_view('file'))
     app.register_blueprint(bp)
 
 

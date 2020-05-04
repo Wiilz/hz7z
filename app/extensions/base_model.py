@@ -43,9 +43,7 @@ class Base(db.Model):
         is_url_list = getattr(cls_attr, 'url_list', None)
         res = getattr(self, item)
         if is_url:
-            if isinstance(res, str) and res.startswith('/img/qrcode'):
-                res = HTTP_HOST + res
-            elif isinstance(res, str) and not res.startswith('http'):
+            if isinstance(res, str) and not res.startswith('http'):
                 res = MEDIA_HOST + res
         elif is_url_list:
             if res:
