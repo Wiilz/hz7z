@@ -222,42 +222,43 @@ def get_medias():
     media_query = Media.query.filter(Media.isdelete == false(), Media.material_type == mt.id)
     if mt.id < 200:
         raise ParamsError('该 material_type 不属于媒体资源分类')
-    if mt.name == '校园视频':
-        return school_video_list(mt)
-    if args.get('id'):
-        res = {'previous': {}, 'current': {}, 'next': {}}
-        current_media = media_query.filter(Media.id == args.get('id')).first_('无此id')
-        res['current'] = current_media
-        res['previous'] = (media_query.filter(Media.createtime > current_media.createtime,
-                                              ).order_by(Media.createtime.asc()).first()
-                           or media_query.filter(Media.createtime < current_media.createtime
-                                                 ).order_by(Media.createtime.asc()).first()
-                           or {})  # 寻找当前记录的前一条，当前记录是第一条的时候，返回整个排序最后一条记录
-        res['next'] = (media_query.filter(Media.createtime < current_media.createtime,
-                                          ).order_by(Media.createtime.desc()).first()
-                       or media_query.filter(Media.createtime > current_media.createtime
-                                             ).order_by(Media.createtime.desc()).first()
-                       or {})  # 寻找当前记录的后一条，当前记录已经是最后一条的时候，返回整个排序最前一条记录
-    else:
-        media_instance = media_query.order_by(Media.createtime.desc()).limit(3).all()
-        res = {'previous': {}, 'current': {}, 'next': {}}
-        if not media_instance:
-            res = res
-        elif len(media_instance) == 1:
-            res['current'] = media_instance[0]
-        #  大于一条记录时，即开始循环获取
-        elif len(media_instance) == 2:
-            res['current'] = media_instance[0]
-            res['previous'] = res['next'] = media_instance[1]
-        else:
-            res['current'] = media_instance[1]
-            res['previous'] = media_instance[0]
-            res['next'] = media_instance[2]
+    res = media_query.order_by(Media.createtime.desc()).all_with_page()
+    # if mt.name == '校园视频':
+    #     return school_video_list(mt)
+    # if args.get('id'):
+    #     res = {'previous': {}, 'current': {}, 'next': {}}
+    #     current_media = media_query.filter(Media.id == args.get('id')).first_('无此id')
+    #     res['current'] = current_media
+    #     res['previous'] = (media_query.filter(Media.createtime > current_media.createtime,
+    #                                           ).order_by(Media.createtime.asc()).first()
+    #                        or media_query.filter(Media.createtime < current_media.createtime
+    #                                              ).order_by(Media.createtime.asc()).first()
+    #                        or {})  # 寻找当前记录的前一条，当前记录是第一条的时候，返回整个排序最后一条记录
+    #     res['next'] = (media_query.filter(Media.createtime < current_media.createtime,
+    #                                       ).order_by(Media.createtime.desc()).first()
+    #                    or media_query.filter(Media.createtime > current_media.createtime
+    #                                          ).order_by(Media.createtime.desc()).first()
+    #                    or {})  # 寻找当前记录的后一条，当前记录已经是最后一条的时候，返回整个排序最前一条记录
+    # else:
+    #     media_instance = media_query.order_by(Media.createtime.desc()).limit(3).all()
+    #     res = {'previous': {}, 'current': {}, 'next': {}}
+    #     if not media_instance:
+    #         res = res
+    #     elif len(media_instance) == 1:
+    #         res['current'] = media_instance[0]
+    #     #  大于一条记录时，即开始循环获取
+    #     elif len(media_instance) == 2:
+    #         res['current'] = media_instance[0]
+    #         res['previous'] = res['next'] = media_instance[1]
+    #     else:
+    #         res['current'] = media_instance[1]
+    #         res['previous'] = media_instance[0]
+    #         res['next'] = media_instance[2]
     return Success('获取成功', data=res)
 
-
-def school_video_list(mt):
-    res = Media.query.filter(Media.isdelete == false(),
-                             Media.material_type == mt.id
-                             ).order_by(Media.createtime.desc()).all_with_page()
-    return Success('获取成功', res)
+#
+# def school_video_list(mt):
+#     res = Media.query.filter(Media.isdelete == false(),
+#                              Media.material_type == mt.id
+#                              ).order_by(Media.createtime.desc()).all_with_page()
+#     return Success('获取成功', res)
