@@ -27,5 +27,5 @@ class Admin(Base):
         self.fields = ['name', 'avatar', 'level', 'status']
         if self.level:
             self.fill('level_zh', AdminLevel(self.level).zh_value)
-        if self.status:
+        if self.status or self.status == 0:
             self.fill('status_zh', AdminStatus(self.status).zh_value)

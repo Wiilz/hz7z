@@ -74,7 +74,7 @@ def login():
     admin = Admin.query.filter(Admin.isdelete == false(),
                                Admin.name == data.get("name")).first()
     if not admin:
-        raise ParamsError('请检查用户名填写是否正确')
+        raise ParamsError('账号不存在')
 
     if not check_password_hash(admin.password, data.get('password')):
         raise ParamsError('密码不正确')
@@ -101,3 +101,55 @@ def update_password():
         admin.update({'password': generate_password_hash(pwd_new)})
         db.session.add(admin)
     return Success('密码更新成功')
+
+
+@admin_required
+def reset_password():
+    """重置管理员密码"""
+    data = parameter_required(('id',))
+    # 判断权限
+    admin_query = Admin.query.filter(Admin.isdelete == false())
+    super_admin = admin_query.filter(Admin.id == getattr(request, 'user').id,
+                                     Admin.level == AdminLevel.super.value).first()
+
+    if not super_admin:
+        raise AuthorityError()
+    admin_id = data.get('id')
+    admin = admin_query.filter(Admin.id == admin_id).first_('无此id消息')
+    with db.auto_commit():
+        admin.update({'password': generate_password_hash('123456')})
+        db.session.add(admin)
+    return Success('密码重置成功', admin_id)
+
+
+@admin_required
+def delete_admin():
+    """删除管理员"""
+    data = parameter_required('id')
+    # 权限判断
+    admin_query = Admin.query.filter(Admin.isdelete == false())
+    super_admin = admin_query.filter(Admin.id == getattr(request, 'user').id,
+                                     Admin.level == AdminLevel.super.value).first()
+
+    if not super_admin:
+        raise AuthorityError()
+    admin_id = data.get('id')
+    admin = admin_query.filter(Admin.id == admin_id).first_('无此id消息')
+    with db.auto_commit():
+        admin.update({'isdelete': True})
+        db.session.add(admin)
+    return Success('账号删除成功', admin_id)
+
+
+@admin_required
+def get_admin_list():
+    """管理员列表"""
+    # 判断权限
+    admin_query = Admin.query.filter(Admin.isdelete == false())
+    super_admin = admin_query.filter(Admin.id == getattr(request, 'user').id,
+                                     Admin.level == AdminLevel.super.value).first()
+    if not super_admin:
+        raise AuthorityError()
+    admin_list = admin_query.order_by(Admin.level.asc(), Admin.createtime.desc()).all_with_page()
+    [ad.add('id') for ad in admin_list]
+    return Success('获取成功', admin_list)
