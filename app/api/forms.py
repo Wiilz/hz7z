@@ -1,4 +1,4 @@
-from ..web.forms import submit_form
+from ..web.forms import submit_form, form_list
 from ..extensions.base_resource import Resource
 
 
@@ -11,5 +11,6 @@ class Forms(Resource):
 
     def get(self, string):
         apis = {
+            'list': form_list,
         }
         return apis

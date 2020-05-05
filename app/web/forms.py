@@ -29,3 +29,11 @@ def submit_form():
                                                    'url': pic}))
         db.session.add_all(instance_list)
     return Success('信息提交成功')
+
+
+@admin_required
+def form_list():
+    """后台查看已提交表单"""
+    froms = Form.query.filter(Form.isdelete == false()
+                              ).order_by(Form.createtime.desc()).all_with_page()
+    return Success('获取成功', data=froms)

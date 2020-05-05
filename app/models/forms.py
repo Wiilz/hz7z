@@ -4,7 +4,7 @@ create user: wiilz
 create time:2020-05-04
 """
 
-from sqlalchemy import String, Text
+from sqlalchemy import String, Text, orm
 from ..extensions.base_model import Base, Column
 
 
@@ -15,6 +15,11 @@ class Form(Base):
     name = Column(String(25), comment='姓名')
     telephone = Column(String(13), comment='电话')
     school = Column(String(200), comment='学校')
+
+    @orm.reconstructor
+    def __init__(self):
+        super(Form, self).__init__()
+        self.add('createtime')
 
 
 class FormImage(Base):
