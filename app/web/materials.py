@@ -103,11 +103,19 @@ def set_media(mt, data):
         parameter_required({'description': '简介 "description"'}, datafrom=data)
         base_dict['description'] = data.get('description')
     with db.auto_commit():
-        base_dict['id'] = str(uuid.uuid1())
-        base_dict['author_id'] = getattr(request, 'user').id
-        media_instance = Media.create(base_dict)
+        if not data.get('id'):
+            base_dict['id'] = str(uuid.uuid1())
+            base_dict['author_id'] = getattr(request, 'user').id
+            media_instance = Media.create(base_dict)
+            msg = '添加成功'
+        else:
+            media_instance = Media.query.filter(Media.isdelete == false(),
+                                                Media.material_type == mt.id,
+                                                Media.id == data.get('id')).first_('未找到信息')
+            media_instance.update(base_dict)
+            msg = '更新成功'
         db.session.add(media_instance)
-    return Success('添加成功', {'media_id': media_instance.id})
+    return Success(msg, {'media_id': media_instance.id})
 
 
 def set_rich_text(mt, data):
