@@ -160,12 +160,20 @@ def get_rich_text():
     if mt.name not in ('学校官微资讯', '招生简章', '招考信息'):  # 仅可存在一篇
         res = rich_text_query.filter(RichText.material_type == mt.id).first_('未找到信息')
     else:
-        res = rich_text_query.filter(RichText.material_type == mt.id
-                                     ).order_by(RichText.createtime.desc()).all_with_page()
-        for item in res:
-            item.hide('content')
-            create_time = str(item.createtime).split('-')
-            item.fill('post_time', f"{create_time[0]}年{int(create_time[1])}月{int(create_time[2][:2])}日")
+        if args.get('id'):
+            res = rich_text_query.filter(RichText.material_type == mt.id,
+                                         RichText.id == args.get('id')).first_('未找到信息')
+            create_time = str(res.createtime).split('-')
+            res.fill('post_time', f"{create_time[0]}年{int(create_time[1])}月{int(create_time[2][:2])}日")
+
+        else:
+            res = rich_text_query.filter(RichText.material_type == mt.id
+                                         ).order_by(RichText.createtime.desc()).all_with_page()
+            for item in res:
+                item.hide('content')
+                create_time = str(item.createtime).split('-')
+                item.fill('post_time', f"{create_time[0]}年{int(create_time[1])}月{int(create_time[2][:2])}日")
+
     return Success('获取成功', data=res)
 
 
