@@ -77,6 +77,30 @@ def _check_lat_and_long(lat, long):
 
 
 @admin_required
+def delete_material():
+    data = parameter_required(('material_type', 'id'))
+    mt = _check_material_type(data.get('material_type'))
+    material_id = data.get('id')
+    with db.auto_commit():
+        if mt.id < 200:
+            instance = RichText.query.filter(RichText.isdelete == false(),
+                                             RichText.material_type == mt.id,
+                                             RichText.id == material_id
+                                             ).first_('未找到信息')
+            if mt.name not in ('学校官微资讯', '招生简章', '招考信息'):  # 仅可存在一篇
+                raise ParamsError('该类型下文章不可删除')
+            instance.update({'isdelete': True})
+        else:
+            instance = Media.query.filter(Media.isdelete == false(),
+                                          Media.material_type == mt.id,
+                                          Media.id == material_id
+                                          ).first_('未找到信息')
+            instance.update({'isdelete': True})
+        db.session.add(instance)
+    return Success('删除成功', {'material_id': material_id})
+
+
+@admin_required
 def set_material():
     data = parameter_required(('material_type',))
     material_type = data.get('material_type')
