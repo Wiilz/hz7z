@@ -1,4 +1,4 @@
-from ..web.materials import contacts_list, get_contacts, set_contacts, set_material, get_rich_text
+from ..web.materials import contacts_list, get_contacts, set_contacts, set_material, get_rich_text, get_medias
 from ..extensions.base_resource import Resource
 
 
@@ -15,5 +15,6 @@ class Materials(Resource):
             'contacts_list': contacts_list,
             'contacts': get_contacts,
             'rich_text': get_rich_text,
+            'medias': get_medias,
         }
         return apis

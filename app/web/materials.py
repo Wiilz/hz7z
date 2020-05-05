@@ -78,7 +78,7 @@ def _check_lat_and_long(lat, long):
 
 @admin_required
 def set_material():
-    data = parameter_required(('material_type', 'content'))
+    data = parameter_required(('material_type',))
     material_type = data.get('material_type')
     mt = _check_material_type(material_type)
     if mt.id < 200:
@@ -89,14 +89,19 @@ def set_material():
 
 def set_media(mt, data):
     """媒体资源/作品展示/校园视频"""
-    base_dict = {'material_type': mt.id, 'content': data.get('media_url')}
-    if mt.name == '校园视频':
+    parameter_required('media_url', datafrom=data)
+    base_dict = {'material_type': mt.id, 'media_url': data.get('media_url')}
+    if mt.name == '校园视频':  # 240
         parameter_required('cover', datafrom=data)
+        if data.get('media_url')[-3:] not in ('mp4', 'avi', 'wmv', 'mov', '3gp', 'flv', 'mpg'):
+            raise ParamsError('请检查上传文件格式是否是视频类型')
+        base_dict['cover'] = data.get('cover')
     else:
-        if data.get('media_url')[-3:] not in ('.jpg', '.jpeg', '.png', '.gif'):
+        if data.get('media_url')[-3:] not in ('jpg', 'jpeg', 'png', 'gif'):
             raise ParamsError('请检查上传文件格式是否是图片类型')
-    if mt.name != '校园风光':
-        parameter_required({'description': '简介'}, datafrom=data)
+    if mt.name != '校园风光':  # !230
+        parameter_required({'description': '简介 "description"'}, datafrom=data)
+        base_dict['description'] = data.get('description')
     with db.auto_commit():
         base_dict['id'] = str(uuid.uuid1())
         base_dict['author_id'] = getattr(request, 'user').id
@@ -107,14 +112,15 @@ def set_media(mt, data):
 
 def set_rich_text(mt, data):
     """编辑富文本文章"""
+    parameter_required('content', datafrom=data)
     base_dict = {'material_type': mt.id, 'content': data.get('content')}
-    if mt.name in ('招生简章', '招考信息'):
+    if mt.name in ('招生简章', '招考信息'):  # 30 40
         parameter_required({'title': '标题 "title"'}, datafrom=data)
         base_dict['title'] = data.get('title')
-    elif mt.name == '特色教育':
+    elif mt.name == '特色教育':  # 60
         parameter_required({'cover': '顶部图片 "cover"'}, datafrom=data)
         base_dict['cover'] = data.get('cover')
-    elif mt.name == '学校官微资讯':
+    elif mt.name == '学校官微资讯':  # 70
         parameter_required({'title': '标题 "title"', 'cover': '列表页主图 "cover"'}, datafrom=data)
         base_dict['cover'] = data.get('cover')
         base_dict['title'] = data.get('title')
@@ -156,7 +162,7 @@ def get_rich_text():
     mt = _check_material_type(args.get('material_type'))
     rich_text_query = RichText.query.filter(RichText.isdelete == false(), )
     if mt.id >= 200:
-        raise ParamsError('该material_type 不属于文章分类')
+        raise ParamsError('该 material_type 不属于文章分类')
     if mt.name not in ('学校官微资讯', '招生简章', '招考信息'):  # 仅可存在一篇
         res = rich_text_query.filter(RichText.material_type == mt.id).first_('未找到信息')
     else:
@@ -177,6 +183,40 @@ def get_rich_text():
     return Success('获取成功', data=res)
 
 
-# todo
 def get_medias():
-    pass
+    """获取媒体资源 作品展示/七中视界"""
+    args = parameter_required('material_type')
+    mt = _check_material_type(args.get('material_type'))
+    media_query = Media.query.filter(Media.isdelete == false(), Media.material_type == mt.id)
+    if mt.id < 200:
+        raise ParamsError('该 material_type 不属于媒体资源分类')
+    if args.get('id'):
+        res = {'previous': {}, 'current': {}, 'next': {}}
+        current_media = media_query.filter(Media.id == args.get('id')).first_('无此id')
+        res['current'] = current_media
+        res['previous'] = (media_query.filter(Media.createtime > current_media.createtime,
+                                              ).order_by(Media.createtime.asc()).first()
+                           or media_query.filter(Media.createtime < current_media.createtime
+                                                 ).order_by(Media.createtime.asc()).first()
+                           or {})  # 寻找当前记录的前一条，当前记录是第一条的时候，返回整个排序最后一条记录
+        res['next'] = (media_query.filter(Media.createtime < current_media.createtime,
+                                          ).order_by(Media.createtime.desc()).first()
+                       or media_query.filter(Media.createtime > current_media.createtime
+                                             ).order_by(Media.createtime.desc()).first()
+                       or {})  # 寻找当前记录的后一条，当前记录已经是最后一条的时候，返回整个排序最前一条记录
+    else:
+        media_instance = media_query.order_by(Media.createtime.desc()).limit(3).all()
+        res = {'previous': {}, 'current': {}, 'next': {}}
+        if not media_instance:
+            res = res
+        elif len(media_instance) == 1:
+            res['current'] = media_instance[0]
+        #  大于一条记录时，即开始循环获取
+        elif len(media_instance) == 2:
+            res['current'] = media_instance[0]
+            res['previous'] = res['next'] = media_instance[1]
+        else:
+            res['current'] = media_instance[1]
+            res['previous'] = media_instance[0]
+            res['next'] = media_instance[2]
+    return Success('获取成功', data=res)
