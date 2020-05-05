@@ -190,6 +190,8 @@ def get_medias():
     media_query = Media.query.filter(Media.isdelete == false(), Media.material_type == mt.id)
     if mt.id < 200:
         raise ParamsError('该 material_type 不属于媒体资源分类')
+    if mt.name == '校园视频':
+        return school_video_list(mt)
     if args.get('id'):
         res = {'previous': {}, 'current': {}, 'next': {}}
         current_media = media_query.filter(Media.id == args.get('id')).first_('无此id')
@@ -220,3 +222,10 @@ def get_medias():
             res['previous'] = media_instance[0]
             res['next'] = media_instance[2]
     return Success('获取成功', data=res)
+
+
+def school_video_list(mt):
+    res = Media.query.filter(Media.isdelete == false(),
+                             Media.material_type == mt.id
+                             ).order_by(Media.createtime.desc()).all_with_page()
+    return Success('获取成功', res)
