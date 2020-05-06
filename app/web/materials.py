@@ -165,7 +165,7 @@ def set_rich_text(mt, data):
                 raise ParamsError('该类型重复, 请到已有文章中进行修改')
             if mt.name == '招生简章' and RichText.query.filter(RichText.isdelete == false(),
                                                            RichText.material_type == mt.id,
-                                                           RichText.title == data.get('title')):
+                                                           RichText.title == data.get('title')).first():
                 raise ParamsError('该标题文章已存在，请检查是否填写重复')
             base_dict['id'] = str(uuid.uuid1())
             base_dict['author_id'] = getattr(request, 'user').id
