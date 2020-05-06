@@ -34,6 +34,16 @@ def submit_form():
 @admin_required
 def form_list():
     """后台查看已提交表单"""
-    froms = Form.query.filter(Form.isdelete == false()
+    parameter_required(('page_num', 'page_size'))
+    forms = Form.query.filter(Form.isdelete == false()
                               ).order_by(Form.createtime.desc()).all_with_page()
-    return Success('获取成功', data=froms)
+    [_fill_form_pics(form) for form in forms]
+    return Success('获取成功', data=forms)
+
+
+def _fill_form_pics(form: "sqlalchemy query object") -> "form sqlalchemy object with pics field":
+    form_pics = FormImage.query.filter(FormImage.isdelete == false(),
+                                       FormImage.form_id == form.id,
+                                       ).all()
+    pics = [item['url'] for item in form_pics]
+    form.fill('pics', pics)

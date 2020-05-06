@@ -144,6 +144,7 @@ def delete_admin():
 @admin_required
 def get_admin_list():
     """管理员列表"""
+    parameter_required(('page_num', 'page_size'))
     # 判断权限
     admin_query = Admin.query.filter(Admin.isdelete == false())
     super_admin = admin_query.filter(Admin.id == getattr(request, 'user').id,
