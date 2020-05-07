@@ -26,9 +26,9 @@ def get_contacts():
 def set_contacts():
     """添加/编辑/删除 联系方式"""
     data = request.json or {}
-    required_param = ('title', 'address', 'longitude',
-                      'latitude', 'telephone', 'fax',
-                      'website', 'mailbox', 'headmaster')
+    required_param = ({'title': '校区名', 'address': '地址', 'longitude': '经度',
+                       'latitude': '纬度', 'telephone': '电话', 'fax': '传真',
+                       'website': '网址', 'mailbox': '邮箱', 'headmaster': '校长'})
     contacts_id = data.get('id')
     longitude, latitude = data.get('longitude'), data.get('latitude')
     contact_dict = {'title': data.get('title'), 'address': data.get('address'),
@@ -120,8 +120,8 @@ def set_media(mt, data):
     else:
         if data.get('media_url')[-3:] not in ('jpg', 'jpeg', 'png', 'gif'):
             raise ParamsError('请检查上传文件格式是否是图片类型')
-    if mt.name == '校园风光':  # 230 没有简介
-        base_dict['description'] = ' '
+    if mt.name == '校园风光':  # 230 默认没有简介时 填上空字符
+        base_dict['description'] = data.get('description', ' ')
     else:
         parameter_required({'description': '简介 "description"'}, datafrom=data)
         base_dict['description'] = data.get('description')

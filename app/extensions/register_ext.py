@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os
+import sys
 import redis
 from contextlib import contextmanager
 from flask_sqlalchemy import SQLAlchemy as _SQLAlchemy
@@ -30,6 +30,6 @@ db = SQLAlchemy(query_class=Query, session_options={"expire_on_commit": False, "
 conn = redis.Redis(host='localhost', port=6379, db=1)
 
 
-def register_ext(app, logger_file='/tmp/hz7z/'):
+def register_ext(app, logger_file='/tmp/hz7z/' if sys.platform != 'win32' else '/hz7z_app/logs/'):
     db.init_app(app)
     LoggerHandler(app, file=logger_file).error_handler()
