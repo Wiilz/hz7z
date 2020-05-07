@@ -11,18 +11,15 @@ from ..models import ContactsCard, MaterialType, RichText, Media
 
 def contacts_list():
     """联系我们 列表"""
-    con_list = ContactsCard.query.filter(ContactsCard.isdelete == false()
-                                         ).order_by(ContactsCard.createtime.desc()).all()
-    return con_list
+    return ContactsCard.query.filter(ContactsCard.isdelete == false()
+                                     ).order_by(ContactsCard.createtime.desc()).all()
 
 
 def get_contacts():
     """详情"""
     args = parameter_required('id')
-    contact_id = args.get('id')
-    contact = ContactsCard.query.filter(ContactsCard.isdelete == false(),
-                                        ContactsCard.id == contact_id).first_('未找到信息')
-    return contact
+    return ContactsCard.query.filter(ContactsCard.isdelete == false(),
+                                     ContactsCard.id == args.get('id')).first_('未找到信息')
 
 
 @admin_required
@@ -123,7 +120,9 @@ def set_media(mt, data):
     else:
         if data.get('media_url')[-3:] not in ('jpg', 'jpeg', 'png', 'gif'):
             raise ParamsError('请检查上传文件格式是否是图片类型')
-    if mt.name != '校园风光':  # !230
+    if mt.name == '校园风光':  # 230 没有简介
+        base_dict['description'] = ' '
+    else:
         parameter_required({'description': '简介 "description"'}, datafrom=data)
         base_dict['description'] = data.get('description')
     with db.auto_commit():
