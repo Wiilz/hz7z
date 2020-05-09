@@ -148,7 +148,7 @@ def set_rich_text(mt, data):
     if mt.name in ('招生简章', '招考信息'):  # 30 40
         parameter_required({'title': '标题 "title"'}, datafrom=data)
         base_dict['title'] = data.get('title')
-    elif mt.name == '特色教育':  # 60
+    elif mt.name in ('学校简介', '学校荣誉', '招生问答', '特色教育'):  # 10 20 50 60
         parameter_required({'cover': '顶部图片 "cover"'}, datafrom=data)
         base_dict['cover'] = data.get('cover')
     elif mt.name == '学校官微资讯':  # 70
@@ -162,9 +162,11 @@ def set_rich_text(mt, data):
                                                            RichText.material_type == mt.id
                                                            ).first():  # 仅能存在一篇的类型
                 raise ParamsError('该类型重复, 请到已有文章中进行修改')
-            if mt.name == '招生简章' and RichText.query.filter(RichText.isdelete == false(),
-                                                           RichText.material_type == mt.id,
-                                                           RichText.title == data.get('title')).first():
+            if mt.name in ('学校官微资讯', '招生简章', '招考信息'
+                           ) and RichText.query.filter(RichText.isdelete == false(),
+                                                       RichText.material_type == mt.id,
+                                                       RichText.title == data.get('title')
+                                                       ).first():
                 raise ParamsError('该标题文章已存在，请检查是否填写重复')
             base_dict['id'] = str(uuid.uuid1())
             base_dict['author_id'] = getattr(request, 'user').id
