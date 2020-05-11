@@ -15,6 +15,7 @@ class Form(Base):
     name = Column(String(25), comment='姓名')
     telephone = Column(String(13), comment='电话')
     school = Column(String(200), comment='学校')
+    remark = Column(Text, comment='备注')
 
     @orm.reconstructor
     def __init__(self):

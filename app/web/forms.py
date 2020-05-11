@@ -21,7 +21,8 @@ def submit_form():
         forms = Form.create({'id': str(uuid.uuid1()),
                              'name': data.get('name'),
                              'telephone': telephone,
-                             'school': data.get('school')})
+                             'school': data.get('school'),
+                             'remark': data.get('remark')})
         instance_list.append(forms)
         for pic in pics:
             instance_list.append(FormImage.create({'id': str(uuid.uuid1()),
