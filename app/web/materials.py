@@ -145,14 +145,14 @@ def set_rich_text(mt, data):
     """编辑富文本文章"""
     parameter_required('content', datafrom=data)
     base_dict = {'material_type': mt.id, 'content': data.get('content')}
-    if mt.name in ('招生简章', '招考信息'):  # 30 40
+    if mt.name == '招考信息':  # 40
         parameter_required({'title': '标题 "title"'}, datafrom=data)
         base_dict['title'] = data.get('title')
     elif mt.name in ('学校简介', '学校荣誉', '招生问答', '特色教育'):  # 10 20 50 60
         parameter_required({'cover': '顶部图片 "cover"'}, datafrom=data)
         base_dict['cover'] = data.get('cover')
-    elif mt.name == '学校官微资讯':  # 70
-        parameter_required({'title': '标题 "title"', 'cover': '列表页主图 "cover"'}, datafrom=data)
+    elif mt.name in ('招生简章', '学校官微资讯'):  # 30 70
+        parameter_required({'title': '标题 "title"', 'cover': '主图 "cover"'}, datafrom=data)
         base_dict['cover'] = data.get('cover')
         base_dict['title'] = data.get('title')
     with db.auto_commit():
