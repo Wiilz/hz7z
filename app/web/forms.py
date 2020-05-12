@@ -48,3 +48,15 @@ def _fill_form_pics(form: "sqlalchemy query object") -> "form sqlalchemy object 
                                        ).all()
     pics = [item['url'] for item in form_pics]
     form.fill('pics', pics)
+
+
+@admin_required
+def delete_form():
+    """删除"""
+    data = parameter_required('id')
+    form = Form.query.filter(Form.isdelete == false(), Form.id == data.get('id')).first_('未找到相关信息')
+    with db.auto_commit():
+        form.update({'isdelete': True})
+        FormImage.query.filter(FormImage.isdelete == false(), FormImage.form_id == form.id).delete_()
+        db.session.add(form)
+    return Success('删除成功', {'id': form.id})
