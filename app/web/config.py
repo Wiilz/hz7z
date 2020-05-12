@@ -38,7 +38,8 @@ def index_entrance():
 @admin_required
 def set_banner():
     """添加banner"""
-    data = parameter_required(('position', 'img_url', 'content_link', 'item_order'))
+    data = parameter_required(('position', 'img_url', 'item_order'))
+    parameter_required({'content_link': '跳转链接'}, datafrom=data)
     try:
         position = int(data.get('position'))
         BannerPosition(position)
@@ -47,7 +48,7 @@ def set_banner():
     banner_id = data.get('id')
     banner_dict = {'position': position,
                    'img_url': data.get('img_url'),
-                   'content_link': data.get('content_link'),
+                   'content_link': data.get('content_link', ' ').strip(),
                    'item_order': data.get('item_order')}
     with db.auto_commit():
         if not banner_id:
@@ -73,7 +74,7 @@ def set_entrance():
     entrance_id = data.get('id')
     entrance_dict = {'img_url': data.get('img_url'),
                      'name': data.get('name'),
-                     'content_link': data.get('content_link'),
+                     'content_link': data.get('content_link', ' ').strip(),
                      'item_order': data.get('item_order')}
     entrance = IndexEntrance.query.filter(IndexEntrance.isdelete == false(),
                                           IndexEntrance.id == entrance_id).first_('未找到信息')
