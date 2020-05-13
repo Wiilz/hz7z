@@ -159,6 +159,6 @@ def new_name(shuffix):
     # except Exception as e:
     #     current_app.logger.error('Error is {}'.format(e))
     #     usid = 'anonymous'
-    usid = 'anonymous' if not hasattr(request, 'user') else getattr(request, 'user').id
+    usid = request.remote_addr if not hasattr(request, 'user') else getattr(request, 'user').id
     res = ''.join(random.choice(myStr) for _ in range(20)) + usid + shuffix
     return res
