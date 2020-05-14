@@ -28,7 +28,7 @@ def set_contacts():
     data = request.json or {}
     required_param = ({'title': '校区名', 'address': '地址', 'longitude': '经度',
                        'latitude': '纬度', 'telephone': '电话', 'fax': '传真',
-                       'website': '网址', 'mailbox': '邮箱', 'headmaster': '校长'})
+                       'website': '网址', 'headmaster': '校长'})
     contacts_id = data.get('id')
     longitude, latitude = data.get('longitude'), data.get('latitude')
     contact_dict = {'title': data.get('title'), 'address': data.get('address'),

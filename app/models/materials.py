@@ -75,7 +75,7 @@ class ContactsCard(Base):
     address = Column(String(255), comment='地址')
     longitude = Column(String(255), comment='经度')
     latitude = Column(String(255), comment='纬度')
-    telephone = Column(String(15), comment='联系电话')
+    telephone = Column(Text, comment='联系电话')
     fax = Column(String(200), comment='传真')
     website = Column(Text, comment='网址')
     mailbox = Column(String(60), comment='邮箱')
