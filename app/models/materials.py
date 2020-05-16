@@ -17,6 +17,7 @@ class RichText(Base):
     title = Column(Text, comment='标题')
     cover = Column(Text, url=True, comment='主图/封面')
     content = Column(LONGTEXT, comment='富文本内容')
+    order = Column(Integer, default=0, comment='顺序')
 
     @property
     def material_type_zh(self):

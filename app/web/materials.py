@@ -155,6 +155,8 @@ def set_rich_text(mt, data):
         parameter_required({'title': '标题 "title"', 'cover': '主图 "cover"'}, datafrom=data)
         base_dict['cover'] = data.get('cover')
         base_dict['title'] = data.get('title')
+    if data.get('order'):
+        base_dict['order'] = _add_item_order(data.get('order'))
     with db.auto_commit():
         if not data.get('id'):  # 新增
             if mt.name not in ('学校官微资讯', '招生简章', '招考信息'
@@ -182,6 +184,14 @@ def set_rich_text(mt, data):
     return Success(msg, data={'rich_text_id': rt_instance.id})
 
 
+def _add_item_order(order):
+    try:
+        order = int(order)
+    except (ValueError, TypeError):
+        raise ParamsError('参数错误：顺序请输入整数')
+    return order
+
+
 def _check_material_type(material_type):
     mt = MaterialType.query.filter(MaterialType.isdelete == false(),
                                    MaterialType.id == material_type
@@ -207,7 +217,7 @@ def get_rich_text():
 
         else:
             res = rich_text_query.filter(RichText.material_type == mt.id
-                                         ).order_by(RichText.createtime.desc()).all_with_page()
+                                         ).order_by(RichText.order.asc(), RichText.createtime.desc()).all_with_page()
             for item in res:
                 item.hide('content')
                 create_time = str(item.createtime).split('-')
