@@ -217,7 +217,8 @@ def get_rich_text():
 
         else:
             res = rich_text_query.filter(RichText.material_type == mt.id
-                                         ).order_by(RichText.order.asc(), RichText.createtime.desc()).all_with_page()
+                                         ).order_by(RichText.order.asc(), RichText.createtime.desc(),
+                                                    RichText.id.asc(), origin=True).all_with_page()
             for item in res:
                 item.hide('content')
                 create_time = str(item.createtime).split('-')
