@@ -159,6 +159,10 @@ def new_name(shuffix):
     # except Exception as e:
     #     current_app.logger.error('Error is {}'.format(e))
     #     usid = 'anonymous'
-    usid = request.remote_addr if not hasattr(request, 'user') else getattr(request, 'user').id
+    try:
+        usid = str(request.remote_addr).replace('.', '') if not hasattr(request, 'user') else getattr(request, 'user').id
+    except Exception as e:
+        current_app.logger.error(f'ERROR: rename file name,  {e}')
+        usid = 'anonymous'
     res = ''.join(random.choice(myStr) for _ in range(20)) + usid + shuffix
     return res
