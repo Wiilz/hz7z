@@ -23,7 +23,7 @@ kombu==4.6.8
 lxml==4.6.2
 Mako==1.1.2
 MarkupSafe==1.1.1
-numpy==1.18.3
+numpy==1.22.0
 opencv-python==4.2.0.32
 parso==0.7.0
 pexpect==4.8.0
